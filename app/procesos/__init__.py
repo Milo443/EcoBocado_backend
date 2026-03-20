@@ -1,12 +1,12 @@
+# Importamos modelos PRIMERO para asegurar que SQLAlchemy registre las relaciones
+from .usuarios.models import UsuarioORM, OTPRecord
+from .lotes.models import LoteORM
+from .reservas.models import ReservaORM
+
 from .usuarios.router import router as usuarios_router
 from .lotes.router import router as lotes_router
 from .reservas.router import router as reservas_router
 from .impacto.router import router as impacto_router
-
-# Importamos modelos para asegurar que SQLAlchemy los registre
-from .usuarios.models import UsuarioORM, OTPRecord
-from .lotes.models import LoteORM
-from .reservas.models import ReservaORM
 
 # Exportamos para fácil importación en main.py
 routers = [

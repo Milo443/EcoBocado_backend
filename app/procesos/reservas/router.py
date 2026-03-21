@@ -32,7 +32,7 @@ async def reservar_lote(reserva: schemas.ReservaCreate, current_user: dict = Dep
     if not nueva_reserva:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El lote no está disponible para reserva"
+            detail="El lote no está disponible para reserva o ya fue reservado"
         )
         
     return nueva_reserva
@@ -47,9 +47,7 @@ async def reservas_activas(current_user: dict = Depends(get_current_user)):
     if not usuario_db:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-    # Podríamos añadir un filtro en queries, pero por ahora filtramos aquí o pedimos a queries
-    total = await queries.get_reservas_usuario(str(usuario_db["id"]))
-    return [r for r in total if r["estado"] == queries.EstadoReserva.PENDIENTE]
+    return await queries.get_reservas_usuario(str(usuario_db["id"]), queries.EstadoReserva.PENDIENTE)
 
 @router.get("/historial", 
             response_model=List[schemas.ReservaPublic],

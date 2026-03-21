@@ -16,7 +16,7 @@ class ReservaORM(Base):
     __tablename__ = "reservas"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    lote_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lotes_alimentos.id"), unique=True, nullable=False)
+    lote_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lotes_alimentos.id"), nullable=False)
     receptor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
     
     estado: Mapped[EstadoReserva] = mapped_column(SQLEnum(EstadoReserva), default=EstadoReserva.PENDIENTE)
@@ -27,5 +27,5 @@ class ReservaORM(Base):
     fecha_completada: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     # Relaciones
-    lote = relationship("LoteORM", back_populates="reserva")
+    lote = relationship("LoteORM", back_populates="reservas")
     receptor = relationship("UsuarioORM", back_populates="reservas")

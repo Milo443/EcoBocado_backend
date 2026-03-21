@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query, Depends
+from typing import List
+from fastapi import APIRouter, Query, Depends, Request, HTTPException
 from .service import obtener_perfil_usuario, login_request, login_verify, registrar_usuario
 from . import schemas
 from .schemas import LoginRequest, LoginVerify
@@ -23,8 +24,10 @@ async def request_otp(data: LoginRequest):
     response_model=schemas.AuthResponse,
     responses={400: {"description": "Código inválido o expirado"}}
 )
-async def verify_otp(data: LoginVerify):
-    return await login_verify(data.email, data.otp_code)
+async def verify_otp(data: LoginVerify, request: Request):
+    ip = request.client.host
+    user_agent = request.headers.get("user-agent")
+    return await login_verify(data.email, data.otp_code, ip, user_agent)
 
 @router.post(
     "/register", 
@@ -59,3 +62,13 @@ async def update_perfil(data: schemas.UsuarioUpdate, current_user: dict = Depend
     if not resultado:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return resultado
+
+@router.get(
+    "/sesiones",
+    summary="Listar auditoría de sesiones",
+    description="Retorna el historial de inicios de sesión de todos los usuarios.",
+    response_model=List[schemas.SessionAuditPublic]
+)
+async def list_sesiones(current_user: dict = Depends(get_current_user)):
+    from .queries import get_audits
+    return await get_audits()

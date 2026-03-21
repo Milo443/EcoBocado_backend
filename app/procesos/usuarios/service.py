@@ -31,7 +31,7 @@ async def login_request(email: str):
     
     return {"exito": True, "mensaje": "Código enviado a su correo"}
 
-async def login_verify(email: str, otp_code: str):
+async def login_verify(email: str, otp_code: str, ip: str = None, user_agent: str = None):
     es_valido = await queries.get_valid_otp(email, otp_code)
     if not es_valido:
         raise HTTPException(status_code=400, detail="Código inválido o expirado")
@@ -48,6 +48,9 @@ async def login_verify(email: str, otp_code: str):
         "id": usuario["id"],
         "role": usuario["rol"]
     })
+    
+    # Auditoría de Sesión
+    await queries.save_session_audit(usuario["id"], usuario["email"], ip, user_agent)
     
     return {
         "exito": True,

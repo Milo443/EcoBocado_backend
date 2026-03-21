@@ -135,3 +135,41 @@ async def update_usuario(email: str, update_data: dict) -> dict | None:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(DatabaseManager.executor, _sync_update_usuario, email, update_data)
 
+from .models import SessionAuditORM
+import uuid
+
+def _sync_save_session_audit(usuario_id: str, email: str, ip: str, agent: str):
+    engine = DatabaseManager._get_engine('postgres_ecobocado')
+    with Session(engine) as session:
+        audit = SessionAuditORM(
+            usuario_id=uuid.UUID(usuario_id),
+            email=email,
+            ip_address=ip,
+            user_agent=agent
+        )
+        session.add(audit)
+        session.commit()
+
+async def save_session_audit(usuario_id: str, email: str, ip: str, agent: str):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(DatabaseManager.executor, _sync_save_session_audit, usuario_id, email, ip, agent)
+
+def _sync_get_audits() -> list[dict]:
+    engine = DatabaseManager._get_engine('postgres_ecobocado')
+    with Session(engine) as session:
+        audits = session.query(SessionAuditORM).order_by(SessionAuditORM.fecha_inicio.desc()).limit(100).all()
+        return [
+            {
+                "id": a.id,
+                "usuario_id": a.usuario_id,
+                "email": a.email,
+                "ip_address": a.ip_address,
+                "user_agent": a.user_agent,
+                "fecha_inicio": a.fecha_inicio
+            } for a in audits
+        ]
+
+async def get_audits() -> list[dict]:
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(DatabaseManager.executor, _sync_get_audits)
+

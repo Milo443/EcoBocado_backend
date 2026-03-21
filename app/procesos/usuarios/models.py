@@ -1,4 +1,4 @@
-from sqlalchemy import String, DateTime, Enum as SQLEnum
+from sqlalchemy import String, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 import uuid
@@ -35,3 +35,16 @@ class OTPRecord(Base):
     otp_code: Mapped[str] = mapped_column(String(10), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     is_used: Mapped[bool] = mapped_column(default=False)
+
+class SessionAuditORM(Base):
+    __tablename__ = "sesiones_auditoria"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    usuario_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    ip_address: Mapped[str] = mapped_column(String(50), nullable=True)
+    user_agent: Mapped[str] = mapped_column(String(500), nullable=True)
+    fecha_inicio: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relación
+    usuario = relationship("UsuarioORM")

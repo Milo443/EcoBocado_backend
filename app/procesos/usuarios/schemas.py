@@ -41,3 +41,17 @@ class AuthResponse(BaseModel):
 class StatusResponse(BaseModel):
     exito: bool
     mensaje: str
+
+from datetime import datetime
+from uuid import UUID
+
+class SessionAuditPublic(BaseModel):
+    id: UUID
+    usuario_id: UUID
+    email: str
+    ip_address: Optional[str]
+    user_agent: Optional[str]
+    fecha_inicio: datetime
+
+    class Config:
+        from_attributes = True

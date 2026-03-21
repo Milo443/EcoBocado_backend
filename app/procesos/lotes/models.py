@@ -38,7 +38,8 @@ class LoteORM(Base):
     
     fecha_publicacion: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     fecha_caducidad: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    esta_borrado: Mapped[bool] = mapped_column(default=False)
 
     # Relaciones
     donante = relationship("UsuarioORM", back_populates="lotes")
-    reserva = relationship("ReservaORM", back_populates="lote", uselist=False)
+    reservas = relationship("ReservaORM", back_populates="lote")

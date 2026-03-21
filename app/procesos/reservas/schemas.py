@@ -17,6 +17,12 @@ class ReservaPublic(BaseModel):
     fecha_limite_recogida: datetime
     fecha_completada: datetime | None = None
     
+    # Campos aplanados para el frontend
+    lote_titulo: str | None = None
+    donante_nombre: str | None = None
+    donante_direccion: str | None = None
+    lote_caduca: datetime | None = None
+    
     # Opcional: Incluir el lote para mayor detalle en el frontend
     lote: LotePublic | None = None
 

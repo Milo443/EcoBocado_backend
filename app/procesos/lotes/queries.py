@@ -3,6 +3,17 @@ from sqlalchemy.orm import Session
 from .models import LoteORM, EstadoLote
 from app.db.bd_conections import DatabaseManager
 
+from app.core.config import settings
+
+def _fix_image_url(url: str | None) -> str | None:
+    if not url:
+        return url
+    # Si la URL contiene el dominio viejo que está fallando/secuestrado, lo reemplazamos por el actual
+    old_domain = "https://cdn.vooltlab.com"
+    if old_domain in url:
+        return url.replace(old_domain, settings.MINIO_ENDPOINT)
+    return url
+
 def _sync_get_lotes_activos() -> list[dict]:
     engine = DatabaseManager._get_engine('postgres_ecobocado')
     with Session(engine) as session:
@@ -17,7 +28,7 @@ def _sync_get_lotes_activos() -> list[dict]:
                 "peso_kg": l.peso_kg,
                 "categoria": l.categoria,
                 "estado": l.estado,
-                "imagen_url": l.imagen_url,
+                "imagen_url": _fix_image_url(l.imagen_url),
                 "fecha_publicacion": l.fecha_publicacion,
                 "fecha_caducidad": l.fecha_caducidad,
                 "reserva_id": None,
@@ -54,7 +65,7 @@ def _sync_create_lote(lote_data: dict, donante_id: str) -> dict:
             "peso_kg": nuevo_lote.peso_kg,
             "categoria": nuevo_lote.categoria,
             "estado": nuevo_lote.estado,
-            "imagen_url": nuevo_lote.imagen_url,
+            "imagen_url": _fix_image_url(nuevo_lote.imagen_url),
             "fecha_publicacion": nuevo_lote.fecha_publicacion,
             "fecha_caducidad": nuevo_lote.fecha_caducidad,
             "reserva_id": None,
@@ -89,7 +100,7 @@ def _sync_get_lotes_by_donante(donante_id: str) -> list[dict]:
                 "peso_kg": l.peso_kg,
                 "categoria": l.categoria,
                 "estado": l.estado,
-                "imagen_url": l.imagen_url,
+                "imagen_url": _fix_image_url(l.imagen_url),
                 "fecha_publicacion": l.fecha_publicacion,
                 "fecha_caducidad": l.fecha_caducidad,
                 "reserva_id": str(reserva_id) if reserva_id else None,
@@ -147,7 +158,7 @@ def _sync_update_lote(lote_id: str, lote_data: dict) -> dict | None:
             "peso_kg": lote.peso_kg,
             "categoria": lote.categoria,
             "estado": lote.estado,
-            "imagen_url": lote.imagen_url,
+            "imagen_url": _fix_image_url(lote.imagen_url),
             "fecha_publicacion": lote.fecha_publicacion,
             "fecha_caducidad": lote.fecha_caducidad,
             "reserva_id": None,

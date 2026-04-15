@@ -2,7 +2,15 @@ import asyncio
 from sqlalchemy.orm import Session
 from .models import UsuarioORM
 from app.db.bd_conections import DatabaseManager
+from app.core.config import settings
 
+def _fix_image_url(url: str | None) -> str | None:
+    if not url:
+        return url
+    old_domain = "https://cdn.vooltlab.com"
+    if old_domain in url:
+        return url.replace(old_domain, settings.MINIO_ENDPOINT)
+    return url
 
 # queries para usuarios
 
@@ -19,7 +27,7 @@ def _sync_get_usuario_by_email(email: str) -> dict | None:
             "nombre": usuario.nombre,
             "email": usuario.email,
             "rol": usuario.rol,
-            "avatar_url": usuario.avatar_url,
+            "avatar_url": _fix_image_url(usuario.avatar_url),
             "direccion": usuario.direccion,
             "telefono": usuario.telefono
         }
@@ -128,7 +136,7 @@ def _sync_update_usuario(email: str, update_data: dict) -> dict | None:
             "rol": usuario.rol,
             "direccion": usuario.direccion,
             "telefono": usuario.telefono,
-            "avatar_url": usuario.avatar_url,
+            "avatar_url": _fix_image_url(usuario.avatar_url),
         }
 
 async def update_usuario(email: str, update_data: dict) -> dict | None:
